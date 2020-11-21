@@ -21,12 +21,6 @@ Route::group(['middleware' => 'auth'], function () {
         [App\Http\Controllers\HomeController::class, 'index']
     )->name('home');
 
-    // 一覧画面
-    Route::get(
-        '/folders/{id}/tasks',
-        [App\Http\Controllers\TaskController::class, 'index']
-    )->name('tasks.index');
-
     // フォルダ作成
     Route::get(
         '/folders/create',
@@ -38,27 +32,36 @@ Route::group(['middleware' => 'auth'], function () {
         [App\Http\Controllers\FolderController::class, 'create']
     );
 
-    // タスク作成
-    Route::get(
-        '/folders/{id}/tasks/create',
-        [App\Http\Controllers\TaskController::class, 'showCreateForm']
-    )->name('tasks.create');
+    // FolderPolicyを適用
+    Route::group(['middleware' => 'can:view,folder'], function () {
+        // 一覧画面
+        Route::get(
+            '/folders/{folder}/tasks',
+            [App\Http\Controllers\TaskController::class, 'index']
+        )->name('tasks.index');
 
-    Route::post(
-        '/folders/{id}/tasks/create',
-        [App\Http\Controllers\TaskController::class, 'create']
-    );
+        // タスク作成
+        Route::get(
+            '/folders/{folder}/tasks/create',
+            [App\Http\Controllers\TaskController::class, 'showCreateForm']
+        )->name('tasks.create');
 
-    // タスク編集
-    Route::get(
-        '/folders/{id}/tasks/{task_id}/edit',
-        [App\Http\Controllers\TaskController::class, 'showEditForm']
-    )->name('tasks.edit');
+        Route::post(
+            '/folders/{folder}/tasks/create',
+            [App\Http\Controllers\TaskController::class, 'create']
+        );
 
-    Route::post(
-        '/folders/{id}/tasks/{task_id}/edit',
-        [App\Http\Controllers\TaskController::class, 'edit']
-    );
+        // タスク編集
+        Route::get(
+            '/folders/{folder}/tasks/{task}/edit',
+            [App\Http\Controllers\TaskController::class, 'showEditForm']
+        )->name('tasks.edit');
+
+        Route::post(
+            '/folders/{folder}/tasks/{task}/edit',
+            [App\Http\Controllers\TaskController::class, 'edit']
+        );
+    });
 });
 
 Auth::routes();
